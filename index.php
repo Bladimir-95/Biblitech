@@ -82,6 +82,43 @@ if(isset($_GET['buscar'])){
                strpos(strtolower($libro->getGenero()), $searchTerm) !== false;
     });
 }
+
+// Prestar un libro
+if (isset($_POST['prestamoForm'])) {
+    if (isset($_POST['id_libro'], $_POST['nombre_usuario'], $_POST['fecha_prestamo'], $_POST['fecha_devolucion'])) {
+        $idLibro = $_POST['id_libro'];
+        $nombreUsuario = $_POST['nombre_usuario'];
+        $fechaPrestamo = $_POST['fecha_prestamo'];
+        $fechaDevolucion = $_POST['fecha_devolucion'];
+
+        foreach ($libros as $libro) {
+            if ($libro->getIdLibro() == $idLibro) {
+                if ($libro->getCantidad() > 0) {
+                    
+                    $libro->setCantidad($libro->getCantidad() - 1);
+
+                    $_SESSION['prestamos'][] = [
+                        'id_libro' => $idLibro,
+                        'nombre_usuario' => $nombreUsuario,
+                        'fecha_prestamo' => $fechaPrestamo,
+                        'fecha_devolucion' => $fechaDevolucion
+                    ];
+
+                    
+
+                    $_SESSION['libros'] = $libros;
+
+                    header('Location: /index.php');
+                    
+                } else {
+                    echo ("No hay libros disponibles para prestar.");
+                }
+            }
+        }
+    }
+    
+}
+
 ?>
 
     <!-- Creacion de libros -->
@@ -161,11 +198,12 @@ if(isset($_GET['buscar'])){
             }
         ?>
 
-
+            <!-- Formulario para buscar un libro -->
             <form action="" method="GET" style="margin-top: 2rem;">
                 <input type="text" name="buscar" id="buscar" placeholder="Buscar libro por titulo, autor o genero">
                 <button type="submit">Buscar</button>
             </form>
+
     <!-- Representacion de los libros -->
     <main style="margin-top: 1rem;">
         <table border="1" cellpadding="10" cellspacing="0"> 
@@ -200,5 +238,23 @@ if(isset($_GET['buscar'])){
         </table>
     </main>
 
+    <h2 style="margin-top: 3 rem;">Prestar un libro</h2>
+<form action="" method="POST">
+    <input type="hidden" name="prestamoForm" value="1">
+    
+    <label>ID del libro:</label>
+    <input type="number" name="id_libro" required>
+
+    <label>Nombre del usuario:</label>
+    <input type="text" name="nombre_usuario" required>
+
+    <label>Fecha de préstamo:</label>
+    <input type="date" name="fecha_prestamo" required>
+
+    <label>Fecha de devolución:</label>
+    <input type="date" name="fecha_devolucion" required>
+
+    <button type="submit">Prestar libro</button>
+</form>
 </body>
 </html>
